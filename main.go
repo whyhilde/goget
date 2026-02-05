@@ -1,9 +1,15 @@
 package main
 
 import (
-	"github.com/whyhilde/ytd/src"
+	"os"
+
+	"github.com/whyhilde/goget/src"
 )
 
-func main() {	
-	src.DownloadVideo("TZCUkmKEOJw?si=dUAHz08rb3nwao19")
+func main() {
+	cfg := src.ParseArgs()
+
+	src.Download(cfg.URL, cfg.Output)
+
+	os.Exit(0)
 }

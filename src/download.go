@@ -1,35 +1,26 @@
 package src
 
 import (
+	"fmt"
 	"io"
+	"net/http"
 	"os"
-
-	youtube "github.com/kkdai/youtube/v2"
 )
 
-func DownloadVideo(videoID string) {
-	client := youtube.Client{}
-
-	video, err := client.GetVideo(videoID)
+func Download(url string, output string) {
+	resp, err := http.Get(url)
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
 	}
+	defer resp.Body.Close()
 
-	formats := video.Formats.WithAudioChannels() // only get videos with audio
-	stream, _, err := client.GetStream(video, &formats[0])
+	out, err := os.Create(output)
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
 	}
-	defer stream.Close()
+	defer out.Close()
 
-	file, err := os.Create("video.mp4")
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-
-	_, err = io.Copy(file, stream)
-	if err != nil {
-		panic(err)
-	}
+	io.Copy(out, resp.Body)
 }
